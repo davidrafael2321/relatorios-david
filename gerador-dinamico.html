@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Link - Relatório</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 30px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 750px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            opacity: 0.8;
+            font-size: 13px;
+        }
+        .content {
+            padding: 25px;
+        }
+        .section {
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .section-header input {
+            flex: 1;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .section-header input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        .remove-day-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .remove-day-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .sabado { background: #764ba2; }
+        .domingo { background: #e74c3c; }
+        .quinta { background: #9b59b6; }
+        .quarta { background: #3498db; }
+        .terca { background: #1abc9c; }
+        .segunda { background: #e67e22; }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            min-height: 50px;
+            resize: vertical;
+        }
+        .month-year-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .month-year-group .half {
+            flex: 1;
+        }
+        .month-year-group select, .month-year-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        .activities-container {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .activity-row {
+            display: grid;
+            grid-template-columns: 1fr 90px 35px;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .activity-row input, .activity-row select {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .action-section {
+            background: #27ae60;
+            padding: 20px;
+            text-align: center;
+        }
+        .action-section p {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: white;
+            color: #27ae60;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        .btn-blue {
+            background: #667eea;
+            color: white;
+        }
+        .btn-blue:hover {
+            background: #5a6fd6;
+        }
+        .link-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            display: none;
+        }
+        .link-box.show {
+            display: block;
+        }
+        .success-msg {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .instructions strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .days-container {
+            margin-bottom: 20px;
+        }
+        .add-day-section {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .add-day-section label {
+            font-size: 12px;
+            color: #27ae60;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .add-day-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .add-day-row select, .add-day-row input {
+            padding: 10px;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .add-day-row input {
+            width: 150px;
+        }
+        .add-day-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Criar Novo Relatório</h1>
+            <p>Preencha e gere um link para compartilhar</p>
+        </div>
+        <div class="content">
+            <div class="instructions">
+                <strong>Como usar:</strong>
+                1. Selecione o Mês e Ano<br>
+                2. Adicione os dias que precisa (ou remova)<br>
+                3. Preencha as informações de cada dia<br>
+                4. Clique em "Gerar Link"
+            </div>
+
+            <div class="form-group">
+                <label>Mês e Ano do Relatório</label>
+                <div class="month-year-group">
+                    <div class="half">
+                        <select id="reportMonth">
+                            <option value="Janeiro">Janeiro</option>
+                            <option value="Fevereiro">Fevereiro</option>
+                            <option value="Março">Março</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Maio">Maio</option>
+                            <option value="Junho">Junho</option>
+                            <option value="Julho">Julho</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Setembro">Setembro</option>
+                            <option value="Outubro">Outubro</option>
+                            <option value="Novembro">Novembro</option>
+                            <option value="Dezembro">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="half">
+                        <input type="number" id="reportYear" value="2026" min="2020" max="2030">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Data do Relatório</label>
+                <input type="text" id="reportDate" placeholder="Ex: 18/02/2026">
+            </div>
+
+            <div class="form-group">
+                <label>Saudação</label>
+                <input type="text" id="greeting" value="Paulo, boa tarde!">
+            </div>
+
+            <!-- Dias do Relatório -->
+            <div class="days-container" id="daysContainer">
+                <!-- Dia 1: Sexta-feira -->
+                <div class="section" id="day-0">
+                    <div class="section-header" id="header-0">
+                        📅 Sexta-feira
+                        <input type="text" id="title-0" value="- 13/02" placeholder="Ex: - 13/02">
+                        <button class="remove-day-btn" onclick="removeDay(0)">✕ Remover</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="text-0" rows="2">Na sexta-feira dia 13/02 dei andamento no processo de implantação do MICALE...</textarea>
+                    </div>
+                    <div class="activities-container">
+                        <label style="font-size: 11px; color: #667eea; font-weight: bold;">Atividades:</label>
+                        <div id="activities-0"></div>
+                        <button class="add-btn" onclick="addActivity(0)">+ Add Atividade</button>
+                    </div>
+                </div>
+
+                <!-- Dia 2: Sábado -->
+                <div class="section" id="day-1">
+                    <div class="section-header sabado" id="header-1">
+                        📅 Sábado
+                        <input type="text" id="title-1" value="- 14/02" placeholder="Ex: - 14/02">
+                        <button class="remove-day-btn" onclick="removeDay(1)">✕ Remover</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="text-1" rows="2">No sábado o Victor ficou de plantão e precisou realizar alguns atendimentos...</textarea>
+                    </div>
+                    <div class="activities-container">
+                        <label style="font-size: 11px; color: #667eea; font-weight: bold;">Atividades:</label>
+                        <div id="activities-1"></div>
+                        <button class="add-btn" onclick="addActivity(1)">+ Add Atividade</button>
+                    </div>
+                </div>
+
+                <!-- Dia 3: Domingo -->
+                <div class="section" id="day-2">
+                    <div class="section-header domingo" id="header-2">
+                        📅 Domingo
+                        <input type="text" id="title-2" value="- 15/02" placeholder="Ex: - 15/02">
+                        <button class="remove-day-btn" onclick="removeDay(2)">✕ Remover</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="text-2" rows="2">Já no domingo, eu fiquei e fiz os atendimentos remotamente...</textarea>
+                    </div>
+                    <div class="activities-container">
+                        <label style="font-size: 11px; color: #667eea; font-weight: bold;">Atividades:</label>
+                        <div id="activities-2"></div>
+                        <button class="add-btn" onclick="addActivity(2)">+ Add Atividade</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adicionar Novo Dia -->
+            <div class="add-day-section">
+                <label>Adicionar Novo Dia</label>
+                <div class="add-day-row">
+                    <select id="newDayName">
+                        <option value="Segunda-feira">Segunda-feira</option>
+                        <option value="Terça-feira">Terça-feira</option>
+                        <option value="Quarta-feira">Quarta-feira</option>
+                        <option value="Quinta-feira">Quinta-feira</option>
+                        <option value="Sexta-feira">Sexta-feira</option>
+                        <option value="Sábado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+                    </select>
+                    <input type="text" id="newDayDate" placeholder="Ex: - 16/02">
+                    <button class="add-day-btn" onclick="addDay()">+ Adicionar</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Resumo Final</label>
+                <textarea id="summaryText">Todas as solicitações atendidas e solucionadas sem nenhuma dificuldade.</textarea>
+            </div>
+        </div>
+        <div class="action-section">
+            <p>Relatório pronto? Gere o link!</p>
+            <div class="btn-row">
+                <button class="btn" onclick="generateLink()">🔗 Gerar Link</button>
+                <button class="btn" onclick="copyLink()">📋 Copiar</button>
+                <button class="btn btn-blue" onclick="shareWhatsApp()">💬 WhatsApp</button>
+            </div>
+            <div class="link-box" id="linkBox"></div>
+            <div class="success-msg" id="successMsg">✅ Link gerado!</div>
+        </div>
+    </div>
+
+    <script>
+        let currentLink = '';
+        let dayCount = 3;
+        const dayClasses = {
+            'Segunda-feira': 'segunda',
+            'Terça-feira': 'terca',
+            'Quarta-feira': 'quarta',
+            'Quinta-feira': 'quinta',
+            'Sexta-feira': '',
+            'Sábado': 'sabado',
+            'Domingo': 'domingo'
+        };
+        
+        // Activities for each day
+        const dayActivities = {
+            0: [
+                { text: "Atividade 1", status: "resolvido" },
+                { text: "Atividade 2", status: "resolvido" }
+            ],
+            1: [
+                { text: "Atividade 1", status: "resolvido" }
+            ],
+            2: [
+                { text: "Atividade 1", status: "resolvido" }
+            ]
+        };
+
+        function renderActivities(dayId) {
+            const container = document.getElementById('activities-' + dayId);
+            container.innerHTML = '';
+            dayActivities[dayId].forEach((act, index) => {
+                const div = document.createElement('div');
+                div.className = 'activity-row';
+                div.innerHTML = `
+                    <input type="text" value="${act.text}" onchange="dayActivities[${dayId}][${index}].text = this.value">
+                    <select onchange="dayActivities[${dayId}][${index}].status = this.value">
+                        <option value="resolvido" ${act.status === 'resolvido' ? 'selected' : ''}>Resolvido</option>
+                        <option value="feito" ${act.status === 'feito' ? 'selected' : ''}>Feito</option>
+                        <option value="pendente" ${act.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                    </select>
+                    <button class="remove-btn" onclick="removeActivity(${dayId}, ${index})">✕</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addActivity(dayId) {
+            dayActivities[dayId].push({ text: "Nova atividade", status: "resolvido" });
+            renderActivities(dayId);
+        }
+
+        function removeActivity(dayId, index) {
+            dayActivities[dayId].splice(index, 1);
+            renderActivities(dayId);
+        }
+
+        function addDay() {
+            const dayName = document.getElementById('newDayName').value;
+            const dayDate = document.getElementById('newDayDate').value || '- 00/00';
+            const dayClass = dayClasses[dayName] || '';
+            const headerClass = dayClass ? `class="section-header ${dayClass}"` : 'class="section-header"';
+            
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.id = 'day-' + dayCount;
+            section.innerHTML = `
+                <div ${headerClass} id="header-${dayCount}">
+                    📅 ${dayName}
+                    <input type="text" id="title-${dayCount}" value="${dayDate}" placeholder="Ex: - 16/02">
+                    <button class="remove-day-btn" onclick="removeDay(${dayCount})">✕ Remover</button>
+                </div>
+                <div class="form-group">
+                    <textarea id="text-${dayCount}" rows="2">Descrição das atividades de ${dayName}...</textarea>
+                </div>
+                <div class="activities-container">
+                    <label style="font-size: 11px; color: #667eea; font-weight: bold;">Atividades:</label>
+                    <div id="activities-${dayCount}"></div>
+                    <button class="add-btn" onclick="addActivity(${dayCount})">+ Add Atividade</button>
+                </div>
+            `;
+            
+            document.getElementById('daysContainer').appendChild(section);
+            dayActivities[dayCount] = [{ text: "Atividade 1", status: "resolvido" }];
+            renderActivities(dayCount);
+            dayCount++;
+            
+            document.getElementById('newDayDate').value = '';
+        }
+
+        function removeDay(dayId) {
+            const section = document.getElementById('day-' + dayId);
+            if (section) {
+                section.remove();
+                delete dayActivities[dayId];
+            }
+        }
+
+        function generateLink() {
+            const baseUrl = window.location.href.replace('gerador-dinamico', 'relatorio-dinamico').split('?')[0];
+            
+            // Collect all days
+            const days = [];
+            for (let i = 0; i < dayCount; i++) {
+                if (document.getElementById('day-' + i)) {
+                    const headerText = document.getElementById('header-' + i).textContent.replace('✕ Remover', '').trim();
+                    const dayName = headerText.replace('📅', '').trim().split('-')[0].trim();
+                    const dayDate = document.getElementById('title-' + i).value;
+                    const dayText = document.getElementById('text-' + i).value;
+                    
+                    days.push({
+                        n: dayName,
+                        d: dayDate,
+                        t: dayText,
+                        a: dayActivities[i] || []
+                    });
+                }
+            }
+            
+            const data = {
+                m: document.getElementById('reportMonth').value,
+                a: document.getElementById('reportYear').value,
+                dt: document.getElementById('reportDate').value,
+                g: document.getElementById('greeting').value,
+                r: document.getElementById('summaryText').value,
+                days: days
+            };
+            
+            const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+            currentLink = baseUrl + '?data=' + encoded;
+            
+            document.getElementById('linkBox').innerHTML = '<strong>Link gerado!</strong><br>' + currentLink;
+            document.getElementById('linkBox').classList.add('show');
+            document.getElementById('successMsg').classList.add('show');
+            setTimeout(() => document.getElementById('successMsg').classList.remove('show'), 3000);
+        }
+
+        function copyLink() {
+            if (!currentLink) generateLink();
+            navigator.clipboard.writeText(currentLink).then(() => {
+                document.getElementById('successMsg').textContent = '✅ Copiado!';
+                document.getElementById('successMsg').classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('successMsg').classList.remove('show');
+                    document.getElementById('successMsg').textContent = '✅ Link gerado!';
+                }, 2000);
+            });
+        }
+
+        function shareWhatsApp() {
+            if (!currentLink) generateLink();
+            const text = encodeURIComponent('Paulo, boa tarde! Segue meu relatório: ' + currentLink);
+            window.open('https://wa.me/?text=' + text, '_blank');
+        }
+
+        // Initialize activities
+        renderActivities(0);
+        renderActivities(1);
+        renderActivities(2);
+    </script>
+</body>
+</html>

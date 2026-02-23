@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Atividades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            width: 100%;
+            max-width: 700px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .header .month-year {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .header .date {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sabado { background: #764ba2; }
+        .domingo { background: #e74c3c; }
+        .quinta { background: #9b59b6; }
+        .quarta { background: #3498db; }
+        .terca { background: #1abc9c; }
+        .segunda { background: #e67e22; }
+        .text-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        .activities-section {
+            margin-top: 15px;
+        }
+        .activities-title {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .activity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .status-resolvido {
+            background: #d4edda;
+            color: #155724;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .status-feito {
+            background: #cce5ff;
+            color: #004085;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .status-pendente {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .activity-text {
+            flex: 1;
+            font-size: 13px;
+            color: #333;
+        }
+        .summary {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 25px;
+        }
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Relatório</h1>
+            <div class="month-year" id="monthYear">Fevereiro - 2026</div>
+            <div class="date" id="reportDate">18/02/2026</div>
+        </div>
+        <div class="content" id="content">
+            <div class="empty">Carregando...</div>
+        </div>
+    </div>
+
+    <script>
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function renderReport() {
+            const dataParam = getUrlParameter('data');
+            
+            if (!dataParam) {
+                document.getElementById('content').innerHTML = '<div class="empty">Nenhum relatório encontrado.<br> Gere um link no gerador.</div>';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(decodeURIComponent(atob(dataParam)));
+                
+                // Header
+                document.getElementById('monthYear').textContent = data.m + ' - ' + data.a;
+                document.getElementById('reportDate').textContent = data.dt || '';
+
+                // Greeting
+                let html = '<div class="section"><div class="text-content">' + data.g + '</div></div>';
+                
+                // Days
+                if (data.days && data.days.length > 0) {
+                    const dayClasses = {
+                        'Segunda-feira': 'segunda',
+                        'Terça-feira': 'terca',
+                        'Quarta-feira': 'quarta',
+                        'Quinta-feira': 'quinta',
+                        'Sexta-feira': '',
+                        'Sábado': 'sabado',
+                        'Domingo': 'domingo'
+                    };
+
+                    data.days.forEach((day, index) => {
+                        const dayClass = dayClasses[day.n] || '';
+                        const headerClass = dayClass ? `section-header ${dayClass}` : 'section-header';
+                        
+                        html += `<div class="section">
+                            <div class="${headerClass}">📅 ${day.n} ${day.d}</div>
+                            <div class="text-content">${day.t}</div>`;
+                        
+                        if (day.a && day.a.length > 0) {
+                            html += '<div class="activities-section">';
+                            day.a.forEach(act => {
+                                const statusClass = `status-${act.status}`;
+                                html += `<div class="activity">
+                                    <span class="activity-text">${act.text}</span>
+                                    <span class="${statusClass}">${act.status.charAt(0).toUpperCase() + act.status.slice(1)}</span>
+                                </div>`;
+                            });
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                    });
+                }
+
+                // Summary
+                if (data.r) {
+                    html += '<div class="summary">' + data.r + '</div>';
+                }
+
+                document.getElementById('content').innerHTML = html;
+
+            } catch (e) {
+                console.error('Erro ao carregar relatório:', e);
+                document.getElementById('content').innerHTML = '<div class="empty">Erro ao carregar relatório.<br>Dados inválidos.</div>';
+            }
+        }
+
+        renderReport();
+    </script>
+</body>
+</html>
