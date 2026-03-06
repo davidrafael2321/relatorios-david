@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Atividades</title>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -164,16 +165,30 @@
 
         function renderReport() {
             let data = null;
+            const zParam = getUrlParameter('z');
             const dataParam = getUrlParameter('data');
             const idParam = getUrlParameter('id');
             
-            if (dataParam) {
+            // Tenta descomprimir do parâmetro 'z'
+            if (zParam) {
+                try {
+                    data = JSON.parse(LZString.decompressFromBase64(zParam));
+                } catch (e) {
+                    console.error('Erro ao descomprimir z:', e);
+                }
+            }
+            
+            // Se não conseguiu, tenta o parâmetro 'data' (base64)
+            if (!data && dataParam) {
                 try {
                     data = JSON.parse(atob(dataParam));
                 } catch (e) {
                     console.error('Erro ao decodificar data:', e);
                 }
-            } else if (idParam) {
+            }
+            
+            // Se não conseguiu, tenta localStorage com 'id'
+            if (!data && idParam) {
                 try {
                     const stored = localStorage.getItem(idParam);
                     if (stored) {

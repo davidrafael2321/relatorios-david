@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Link - Relatório</title>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -550,16 +551,21 @@
             
             const jsonStr = JSON.stringify(data);
             
-            // Gera um ID único baseado em timestamp
-            const reportId = 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            // Comprime os dados com LZ-String
+            const compressed = LZString.compressToBase64(jsonStr);
             
-            // Armazena no localStorage (funciona localmente)
-            localStorage.setItem(reportId, jsonStr);
+            // Se ainda ficar muito longo, usa localStorage
+            if (compressed.length > 2000) {
+                const reportId = 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem(reportId, jsonStr);
+                currentLink = baseUrl + '?id=' + reportId;
+                document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Dados armazenados localmente (localStorage).</small>';
+            } else {
+                // Usa URL comprimida
+                currentLink = baseUrl + '?z=' + compressed;
+                document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Dados comprimidos na URL.</small>';
+            }
             
-            // Cria link com ID curto
-            currentLink = baseUrl + '?id=' + reportId;
-            
-            document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Este link funcionará permanentemente e pode ser compartilhado.</small>';
             document.getElementById('linkBox').classList.add('show');
             document.getElementById('successMsg').classList.add('show');
             setTimeout(() => document.getElementById('successMsg').classList.remove('show'), 3000);
