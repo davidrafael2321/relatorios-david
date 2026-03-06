@@ -339,7 +339,7 @@
                 <!-- Dia 1: Sexta-feira -->
                 <div class="section" id="day-0">
                     <div class="section-header" id="header-0">
-                        📅 Sexta-feira
+                        📋 Sexta-feira
                         <input type="text" id="title-0" value="- 13/02" placeholder="Ex: - 13/02">
                         <button class="remove-day-btn" onclick="removeDay(0)">✕ Remover</button>
                     </div>
@@ -356,7 +356,7 @@
                 <!-- Dia 2: Sábado -->
                 <div class="section" id="day-1">
                     <div class="section-header sabado" id="header-1">
-                        📅 Sábado
+                        📋 Sábado
                         <input type="text" id="title-1" value="- 14/02" placeholder="Ex: - 14/02">
                         <button class="remove-day-btn" onclick="removeDay(1)">✕ Remover</button>
                     </div>
@@ -373,7 +373,7 @@
                 <!-- Dia 3: Domingo -->
                 <div class="section" id="day-2">
                     <div class="section-header domingo" id="header-2">
-                        📅 Domingo
+                        📋 Domingo
                         <input type="text" id="title-2" value="- 15/02" placeholder="Ex: - 15/02">
                         <button class="remove-day-btn" onclick="removeDay(2)">✕ Remover</button>
                     </div>
@@ -436,17 +436,16 @@
             'Domingo': 'domingo'
         };
         
-        // Activities for each day
         const dayActivities = {
             0: [
-                { text: "Atividade 1", status: "resolvido" },
-                { text: "Atividade 2", status: "resolvido" }
+                { text: "Atividade 1", status: "concluido" },
+                { text: "Atividade 2", status: "concluido" }
             ],
             1: [
-                { text: "Atividade 1", status: "resolvido" }
+                { text: "Atividade 1", status: "concluido" }
             ],
             2: [
-                { text: "Atividade 1", status: "resolvido" }
+                { text: "Atividade 1", status: "concluido" }
             ]
         };
 
@@ -459,9 +458,9 @@
                 div.innerHTML = `
                     <input type="text" value="${act.text}" onchange="dayActivities[${dayId}][${index}].text = this.value">
                     <select onchange="dayActivities[${dayId}][${index}].status = this.value">
-                        <option value="resolvido" ${act.status === 'resolvido' ? 'selected' : ''}>Resolvido</option>
-                        <option value="feito" ${act.status === 'feito' ? 'selected' : ''}>Feito</option>
+                        <option value="concluido" ${act.status === 'concluido' ? 'selected' : ''}>Concluído</option>
                         <option value="pendente" ${act.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="em-andamento" ${act.status === 'em-andamento' ? 'selected' : ''}>Em andamento</option>
                     </select>
                     <button class="remove-btn" onclick="removeActivity(${dayId}, ${index})">✕</button>
                 `;
@@ -470,7 +469,7 @@
         }
 
         function addActivity(dayId) {
-            dayActivities[dayId].push({ text: "Nova atividade", status: "resolvido" });
+            dayActivities[dayId].push({ text: "Nova atividade", status: "concluido" });
             renderActivities(dayId);
         }
 
@@ -490,7 +489,7 @@
             section.id = 'day-' + dayCount;
             section.innerHTML = `
                 <div ${headerClass} id="header-${dayCount}">
-                    📅 ${dayName}
+                    📋 ${dayName}
                     <input type="text" id="title-${dayCount}" value="${dayDate}" placeholder="Ex: - 16/02">
                     <button class="remove-day-btn" onclick="removeDay(${dayCount})">✕ Remover</button>
                 </div>
@@ -505,7 +504,7 @@
             `;
             
             document.getElementById('daysContainer').appendChild(section);
-            dayActivities[dayCount] = [{ text: "Atividade 1", status: "resolvido" }];
+            dayActivities[dayCount] = [{ text: "Atividade 1", status: "concluido" }];
             renderActivities(dayCount);
             dayCount++;
             
@@ -523,12 +522,11 @@
         function generateLink() {
             const baseUrl = window.location.href.replace('gerador-dinamico', 'relatorio-dinamico').split('?')[0];
             
-            // Collect all days
             const days = [];
             for (let i = 0; i < dayCount; i++) {
                 if (document.getElementById('day-' + i)) {
                     const headerText = document.getElementById('header-' + i).textContent.replace('✕ Remover', '').trim();
-                    const dayName = headerText.replace('📅', '').trim().split('-')[0].trim();
+                    const dayName = headerText.replace('📋', '').trim().split('-')[0].trim();
                     const dayDate = document.getElementById('title-' + i).value;
                     const dayText = document.getElementById('text-' + i).value;
                     
@@ -550,10 +548,18 @@
                 days: days
             };
             
-            const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-            currentLink = baseUrl + '?data=' + encoded;
+            const jsonStr = JSON.stringify(data);
             
-            document.getElementById('linkBox').innerHTML = '<strong>Link gerado!</strong><br>' + currentLink;
+            // Gera um ID único baseado em timestamp
+            const reportId = 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Armazena no localStorage (funciona localmente)
+            localStorage.setItem(reportId, jsonStr);
+            
+            // Cria link com ID curto
+            currentLink = baseUrl + '?id=' + reportId;
+            
+            document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Este link funcionará permanentemente e pode ser compartilhado.</small>';
             document.getElementById('linkBox').classList.add('show');
             document.getElementById('successMsg').classList.add('show');
             setTimeout(() => document.getElementById('successMsg').classList.remove('show'), 3000);
@@ -577,7 +583,6 @@
             window.open('https://wa.me/?text=' + text, '_blank');
         }
 
-        // Initialize activities
         renderActivities(0);
         renderActivities(1);
         renderActivities(2);

@@ -85,12 +85,6 @@
         .activities-section {
             margin-top: 15px;
         }
-        .activities-title {
-            font-size: 12px;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
         .activity {
             display: flex;
             align-items: center;
@@ -101,18 +95,9 @@
             border-radius: 8px;
             margin-bottom: 8px;
         }
-        .status-resolvido {
+        .status-concluido {
             background: #d4edda;
             color: #155724;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        .status-feito {
-            background: #cce5ff;
-            color: #004085;
             padding: 3px 10px;
             border-radius: 15px;
             font-size: 11px;
@@ -122,6 +107,15 @@
         .status-pendente {
             background: #f8d7da;
             color: #721c24;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .status-em-andamento {
+            background: #fff3cd;
+            color: #856404;
             padding: 3px 10px;
             border-radius: 15px;
             font-size: 11px;
@@ -169,24 +163,38 @@
         }
 
         function renderReport() {
+            let data = null;
             const dataParam = getUrlParameter('data');
+            const idParam = getUrlParameter('id');
             
-            if (!dataParam) {
-                document.getElementById('content').innerHTML = '<div class="empty">Nenhum relatório encontrado.<br> Gere um link no gerador.</div>';
+            if (dataParam) {
+                try {
+                    data = JSON.parse(atob(dataParam));
+                } catch (e) {
+                    console.error('Erro ao decodificar data:', e);
+                }
+            } else if (idParam) {
+                try {
+                    const stored = localStorage.getItem(idParam);
+                    if (stored) {
+                        data = JSON.parse(stored);
+                    }
+                } catch (e) {
+                    console.error('Erro ao recuperar do localStorage:', e);
+                }
+            }
+            
+            if (!data) {
+                document.getElementById('content').innerHTML = '<div class="empty">Nenhum relatório encontrado.<br>Gere um link no gerador.</div>';
                 return;
             }
 
             try {
-                const data = JSON.parse(decodeURIComponent(atob(dataParam)));
-                
-                // Header
                 document.getElementById('monthYear').textContent = data.m + ' - ' + data.a;
                 document.getElementById('reportDate').textContent = data.dt || '';
 
-                // Greeting
                 let html = '<div class="section"><div class="text-content">' + data.g + '</div></div>';
                 
-                // Days
                 if (data.days && data.days.length > 0) {
                     const dayClasses = {
                         'Segunda-feira': 'segunda',
@@ -198,21 +206,22 @@
                         'Domingo': 'domingo'
                     };
 
-                    data.days.forEach((day, index) => {
+                    data.days.forEach((day) => {
                         const dayClass = dayClasses[day.n] || '';
                         const headerClass = dayClass ? `section-header ${dayClass}` : 'section-header';
                         
                         html += `<div class="section">
-                            <div class="${headerClass}">📅 ${day.n} ${day.d}</div>
+                            <div class="${headerClass}">📋 ${day.n} ${day.d}</div>
                             <div class="text-content">${day.t}</div>`;
                         
                         if (day.a && day.a.length > 0) {
                             html += '<div class="activities-section">';
                             day.a.forEach(act => {
                                 const statusClass = `status-${act.status}`;
+                                const statusText = act.status.charAt(0).toUpperCase() + act.status.slice(1).replace('-', ' ');
                                 html += `<div class="activity">
                                     <span class="activity-text">${act.text}</span>
-                                    <span class="${statusClass}">${act.status.charAt(0).toUpperCase() + act.status.slice(1)}</span>
+                                    <span class="${statusClass}">${statusText}</span>
                                 </div>`;
                             });
                             html += '</div>';
@@ -222,7 +231,6 @@
                     });
                 }
 
-                // Summary
                 if (data.r) {
                     html += '<div class="summary">' + data.r + '</div>';
                 }
