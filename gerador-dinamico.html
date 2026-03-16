@@ -283,6 +283,15 @@
             font-size: 14px;
             font-weight: bold;
         }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -554,18 +563,10 @@
             // Comprime os dados com LZ-String
             const compressed = LZString.compressToBase64(jsonStr);
             
-            // Se ainda ficar muito longo, usa localStorage
-            if (compressed.length > 2000) {
-                const reportId = 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem(reportId, jsonStr);
-                currentLink = baseUrl + '?id=' + reportId;
-                document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Dados armazenados localmente (localStorage).</small>';
-            } else {
-                // Usa URL comprimida
-                currentLink = baseUrl + '?z=' + compressed;
-                document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>Dados comprimidos na URL.</small>';
-            }
+            // Cria o link com dados comprimidos
+            currentLink = baseUrl + '?z=' + compressed;
             
+            document.getElementById('linkBox').innerHTML = '<strong>✅ Link gerado com sucesso!</strong><br><br>' + currentLink + '<br><br><small>✓ Funciona em qualquer dispositivo e navegador</small>';
             document.getElementById('linkBox').classList.add('show');
             document.getElementById('successMsg').classList.add('show');
             setTimeout(() => document.getElementById('successMsg').classList.remove('show'), 3000);

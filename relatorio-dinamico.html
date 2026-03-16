@@ -143,6 +143,13 @@
             padding: 40px;
             color: #999;
         }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -167,12 +174,14 @@
             let data = null;
             const zParam = getUrlParameter('z');
             const dataParam = getUrlParameter('data');
-            const idParam = getUrlParameter('id');
             
-            // Tenta descomprimir do parâmetro 'z'
+            // Tenta descomprimir do parâmetro 'z' (LZ-String)
             if (zParam) {
                 try {
-                    data = JSON.parse(LZString.decompressFromBase64(zParam));
+                    const decompressed = LZString.decompressFromBase64(zParam);
+                    if (decompressed) {
+                        data = JSON.parse(decompressed);
+                    }
                 } catch (e) {
                     console.error('Erro ao descomprimir z:', e);
                 }
@@ -187,20 +196,8 @@
                 }
             }
             
-            // Se não conseguiu, tenta localStorage com 'id'
-            if (!data && idParam) {
-                try {
-                    const stored = localStorage.getItem(idParam);
-                    if (stored) {
-                        data = JSON.parse(stored);
-                    }
-                } catch (e) {
-                    console.error('Erro ao recuperar do localStorage:', e);
-                }
-            }
-            
             if (!data) {
-                document.getElementById('content').innerHTML = '<div class="empty">Nenhum relatório encontrado.<br>Gere um link no gerador.</div>';
+                document.getElementById('content').innerHTML = '<div class="error">❌ Erro ao carregar relatório.<br><br>O link pode estar corrompido ou expirado.<br><br>Peça ao criador do relatório para gerar um novo link.</div>';
                 return;
             }
 
@@ -208,7 +205,7 @@
                 document.getElementById('monthYear').textContent = data.m + ' - ' + data.a;
                 document.getElementById('reportDate').textContent = data.dt || '';
 
-                let html = '<div class="section"><div class="text-content">' + data.g + '</div></div>';
+                let html = '<div class="section"><div class="text-content">' + (data.g || '') + '</div></div>';
                 
                 if (data.days && data.days.length > 0) {
                     const dayClasses = {
@@ -227,7 +224,7 @@
                         
                         html += `<div class="section">
                             <div class="${headerClass}">📋 ${day.n} ${day.d}</div>
-                            <div class="text-content">${day.t}</div>`;
+                            <div class="text-content">${day.t || ''}</div>`;
                         
                         if (day.a && day.a.length > 0) {
                             html += '<div class="activities-section">';
@@ -235,7 +232,7 @@
                                 const statusClass = `status-${act.status}`;
                                 const statusText = act.status.charAt(0).toUpperCase() + act.status.slice(1).replace('-', ' ');
                                 html += `<div class="activity">
-                                    <span class="activity-text">${act.text}</span>
+                                    <span class="activity-text">${act.text || ''}</span>
                                     <span class="${statusClass}">${statusText}</span>
                                 </div>`;
                             });
@@ -254,7 +251,7 @@
 
             } catch (e) {
                 console.error('Erro ao carregar relatório:', e);
-                document.getElementById('content').innerHTML = '<div class="empty">Erro ao carregar relatório.<br>Dados inválidos.</div>';
+                document.getElementById('content').innerHTML = '<div class="error">❌ Erro ao processar relatório.<br><br>Dados inválidos ou corrompidos.</div>';
             }
         }
 
